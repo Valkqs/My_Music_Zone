@@ -11,6 +11,8 @@
         >
           <CldImage 
             src="album1_47_grk5bt" 
+            width="208"
+            height="208"
             alt="浮动专辑封面1"
             class="w-full h-full rounded-lg shadow-2xl transform -rotate-12"
             format="auto" quality="auto"
@@ -23,6 +25,8 @@
         >
           <CldImage 
             src="album2_pmt9fb"
+            width="160"
+            height="160"
             alt="浮动专辑封面2"
             class="w-full h-full rounded-lg shadow-2xl transform rotate-6"
             format="auto" quality="auto"
@@ -35,6 +39,8 @@
         >
           <CldImage 
             src="album3_xe8x8y"
+            width="144"
+            height="144"
             alt="浮动专辑封面3"
             class="w-full h-full rounded-lg shadow-2xl transform rotate-3"
             format="auto" quality="auto"
@@ -47,6 +53,8 @@
         >
           <CldImage 
             src="darkside_qphm4u"
+            width="192"
+            height="192"
             alt="浮动专辑封面4"
             class="w-full h-full rounded-lg shadow-2xl transform -rotate-3"
             format="auto" quality="auto"
@@ -59,6 +67,8 @@
         >
           <CldImage 
             src="album6_rxitq7"
+            width="128"
+            height="128"
             alt="浮动专辑封面5"
             class="w-full h-full rounded-lg shadow-2xl transform rotate-12"
             format="auto" quality="auto"
@@ -71,6 +81,8 @@
         >
           <CldImage 
             src="album5_ptz4jw"
+            width="128"
+            height="128"
             alt="浮动专辑封面6"
             class="w-full h-full rounded-lg shadow-2xl transform -rotate-6"
             format="auto" quality="auto"
@@ -92,7 +104,6 @@
           <!-- 个人照片 -->
           <div class="md:col-span-1 flex justify-center">
             <div class="w-64 h-64 rounded-full overflow-hidden shadow-2xl ring-4 ring-teal-400/50">
-               <!-- 使用 CldImage 替换 <img> -->
                <CldImage 
                  src="head_i3v0do" 
                  width="256"
@@ -123,48 +134,24 @@
       </div>
     </section>
 
-     <!-- Featured Music Section: 精选音乐展示 -->
+     <!-- Featured Music Section: 最近收藏的专辑 -->
     <section class="bg-cyan-700 py-20 sm:py-32">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
-          <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">精选作品</h2>
-          <p class="mt-4 text-lg leading-8 text-gray-300">一些我最喜欢的作品，希望你也会喜欢。</p>
+          <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">最近收藏</h2>
+          <p class="mt-4 text-lg leading-8 text-gray-300">一些我最近收藏的专辑。</p>
         </div>
-        <div class="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          <!-- 作品卡片 1 -->
-          <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
-            <div class="w-full aspect-square">
-              <CldImage class="w-full h-full object-cover" src="my-music-site/album-1-placeholder" width="600" height="600" alt="专辑封面" format="auto" quality="auto" />
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-semibold text-white">城市梦游</h3>
-              <p class="mt-2 text-gray-400">一首关于夜晚都市的氛围电子乐。</p>
-              <button class="mt-4 w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300">播放</button>
-            </div>
-          </div>
-          <!-- 作品卡片 2 -->
-          <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
-            <div class="w-full aspect-square">
-              <CldImage class="w-full h-full object-cover" src="my-music-site/album-2-placeholder" width="600" height="600" alt="专辑封面" format="auto" quality="auto" />
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-semibold text-white">夏末回响</h3>
-              <p class="mt-2 text-gray-400">用吉他和弦捕捉逝去的夏天。</p>
-              <button class="mt-4 w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300">播放</button>
-            </div>
-          </div>
-          <!-- 作品卡片 3 -->
-          <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
-            <div class="w-full aspect-square">
-              <CldImage class="w-full h-full object-cover" src="my-music-site/album-3-placeholder" width="600" height="600" alt="专辑封面" format="auto" quality="auto" />
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-semibold text-white">星尘低语</h3>
-              <p class="mt-2 text-gray-400">献给所有仰望星空的人。</p>
-              <button class="mt-4 w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300">播放</button>
-            </div>
-          </div>
+        
+        <!-- 加载与错误状态处理 -->
+        <div v-if="pending" class="text-center text-white mt-16">正在加载收藏...</div>
+        <div v-else-if="error" class="text-center text-red-300 mt-16">加载收藏失败: {{ error.message }}</div>
+        
+        <!-- 专辑列表 -->
+        <div v-else-if="collectedAlbums && collectedAlbums.length" class="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <AlbumCard v-for="album in collectedAlbums.slice(0, 3)" :key="album.album_mid" :album="album" />
         </div>
+
+        <div v-else class="text-center text-gray-300 mt-16">暂无收藏专辑。</div>
       </div>
     </section>
 
@@ -172,7 +159,8 @@
 </template>
 
 <script setup>
-// 主页特定的逻辑可以写在这里
+// 使用 useFetch 来获取收藏的专辑数据
+const { data: collectedAlbums, pending, error } = await useFetch('/api/user/collected-albums');
 </script>
 
 <style>
