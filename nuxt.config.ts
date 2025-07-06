@@ -5,7 +5,8 @@ export default defineNuxtConfig({
 
   modules: [
     '@nuxt/content',
-    '@nuxtjs/cloudinary'
+    '@nuxtjs/cloudinary',
+    '@pinia/nuxt',
   ],
   cloudinary: {
     cloudName: 'dd4herx0f' // <--- 在这里替换成您自己的 Cloud Name
