@@ -42,8 +42,14 @@
           <img :src="getAlbumArt(song.albummid)" class="w-12 h-12 rounded ml-4 object-cover" alt="专辑封面" />
           <div class="ml-4 flex-grow overflow-hidden">
             <div class="font-semibold text-white truncate">{{ song.name }}</div>
+            <!-- 修改：循环渲染歌手和专辑链接 -->
             <div class="text-sm text-gray-400 truncate">
-              <span>{{ song.singer }}</span>
+              <span v-for="(singer, singerIndex) in song.singers" :key="singer.mid">
+                <NuxtLink :to="`/singer/${singer.mid}`" @click.stop class="hover:underline hover:text-teal-400">
+                  {{ singer.name }}
+                </NuxtLink>
+                <span v-if="singerIndex < song.singers.length - 1">, </span>
+              </span>
               <span v-if="song.albumname" class="mx-1">·</span>
               <NuxtLink 
                 v-if="song.albummid && song.albumname"
@@ -113,9 +119,6 @@ const search = async () => {
   pending.value = true
   error.value = null
   
-  // --- 新增日志 ---
-  console.log(`[Frontend] 开始搜索, 类型: ${searchType.value}, 关键词: ${searchQuery.value}`);
-
   try {
     const data = await $fetch('/api/search', {
       params: { 
@@ -123,19 +126,10 @@ const search = async () => {
         type: searchType.value 
       }
     })
-    // --- 新增日志 ---
-    console.log('[Frontend] 从 API 收到数据:', data);
-
     results.value = data
-    
-    // --- 新增日志 ---
-    console.log('[Frontend] results 变量已被更新:', results.value);
-
   } catch (e) {
     error.value = e
     results.value = []
-    // --- 新增日志 ---
-    console.error('[Frontend] 搜索时发生错误:', e);
   } finally {
     pending.value = false
   }
@@ -156,7 +150,7 @@ const downloadSong = async (song) => {
     if (songData && songData.url) {
       const link = document.createElement('a')
       link.href = songData.url
-      const fileName = `${song.singer} - ${song.name}.mp3`
+      const fileName = `${song.singers.map(s=>s.name).join(', ')} - ${song.name}.mp3`
       link.download = fileName
       document.body.appendChild(link)
       link.click()

@@ -1,16 +1,11 @@
 <template>
   <main class="py-12">
-    <!-- 调试信息框 -->
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl mb-6 bg-red-900/50 p-4 rounded-lg border border-red-700">
-      <h2 class="text-white font-bold text-lg mb-2">调试信息</h2>
-      <p class="text-sm text-white">当前路径 (path): <code class="text-yellow-300 font-mono">{{ path }}</code></p>
-      <p class="text-sm text-white">数据加载中 (pending): <code class="text-yellow-300 font-mono">{{ pending }}</code></p>
-      <p class="text-sm text-white">是否有错误 (error): <code class="text-yellow-300 font-mono">{{ !!error }}</code></p>
-      <p class="text-sm text-white">获取到的文档 (doc): <code class="text-yellow-300 font-mono">{{ doc ? '存在' : '不存在 (null)' }}</code></p>
-      <pre v-if="error" class="text-red-300 mt-2 text-xs bg-black/20 p-2 rounded">{{ error }}</pre>
+    <div v-if="pending" class="text-center text-gray-300 py-20">正在加载文章...</div>
+    <div v-else-if="error" class="text-center text-red-400 py-20">
+        <p>抱歉，加载文章失败或文章不存在。</p>
+        <p class="text-sm mt-2">错误: {{ error.message }}</p>
     </div>
-
-    <div v-if="doc" class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
+    <div v-else-if="doc" class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
       <!-- 文章头部 -->
       <div class="text-center mb-12">
         <p class="text-gray-400">{{ formatDate(doc.date) }}</p>
@@ -32,49 +27,28 @@
 
       <!-- 文章内容渲染区域 -->
       <div class="prose prose-invert prose-lg max-w-none">
-        <ContentRenderer :value="doc" />
+        <!-- 遍历内容块 -->
+        <div v-for="(block, index) in doc.content" :key="index">
+          <!-- 如果是 HTML 块，用 v-html 渲染 -->
+          <div v-if="block.type === 'html'" v-html="block.content"></div>
+          <!-- 如果是播放器块，渲染 InlinePlayer 组件 -->
+          <InlinePlayer v-if="block.type === 'player'" :songmid="block.songmid" />
+        </div>
       </div>
-    </div>
-     <!-- 添加一个错误状态的显示 -->
-    <div v-else class="text-center text-gray-300 py-20">
-      <p>抱歉，加载文章失败或文章不存在。</p>
     </div>
   </main>
 </template>
 
 <script setup>
-// 明确导入所有需要的函数
-import { useRoute } from 'vue-router'
-import { useAsyncData, useHead } from '#app'
-import { queryContent, ContentRenderer } from '#content'
-
-console.log('[Blog Detail] 页面脚本开始执行...');
-
 const route = useRoute();
-const path = route.path;
+const { data: doc, pending, error } = await useFetch(`/api/articles/${route.params.slug}`);
 
-console.log(`[Blog Detail] 从 useRoute 获取到的路径: ${path}`);
-
-// 将 error 也解构出来，方便在模板中显示
-const { data: doc, pending, error } = await useAsyncData(`content-${path}`, () => {
-  console.log(`[Blog Detail] useAsyncData 正在执行查询: queryContent().where({ _path: "${path}" })`);
-  return queryContent().where({ _path: path }).findOne();
-});
-
-console.log('[Blog Detail] useAsyncData 执行完毕。');
-console.log('[Blog Detail] pending 状态:', pending.value);
-console.log('[Blog Detail] error 对象:', error.value);
-console.log('[Blog Detail] doc 数据:', doc.value);
-
-
-// 格式化日期的辅助函数
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
   return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
 };
 
-// 设置页面 SEO 元数据
 useHead({
   title: () => doc.value?.title || '博客文章',
   meta: [
@@ -85,27 +59,30 @@ useHead({
 
 <style>
 /* 为文章内容提供更好的样式 */
-.prose {
-  color: #d1d5db; /* text-gray-300 */
+.prose { color: #d1d5db; }
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 { color: #ffffff; }
+
+/* 新增：为二级和三级标题设置不同的大小和间距 */
+.prose h2 {
+  font-size: 1.875rem; /* 等同于 text-3xl */
+  line-height: 2.25rem;
+  margin-top: 2em;
+  margin-bottom: 1em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid #4b5563; /* border-gray-600 */
 }
-.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-  color: #ffffff;
+
+.prose h3 {
+  font-size: 1.5rem; /* 等同于 text-2xl */
+  line-height: 2rem;
+  margin-top: 1.6em;
+  margin-bottom: 0.6em;
 }
-.prose a {
-  color: #2dd4bf; /* text-teal-400 */
-  text-decoration: none;
-}
-.prose a:hover {
-  text-decoration: underline;
-}
-.prose blockquote {
-  border-left-color: #5eead4; /* border-teal-300 */
-  color: #9ca3af; /* text-gray-400 */
-}
-.prose code {
-  color: #f9fafb; /* text-gray-50 */
-  background-color: #374151; /* bg-gray-700 */
-  padding: 0.2em 0.4em;
-  border-radius: 0.25rem;
-}
+
+.prose a { color: #2dd4bf; text-decoration: none; }
+.prose a:hover { text-decoration: underline; }
+.prose blockquote { border-left-color: #5eead4; color: #9ca3af; }
+.prose code { color: #f9fafb; background-color: #374151; padding: 0.2em 0.4em; border-radius: 0.25rem; }
+.prose p { margin-top: 1.25em; margin-bottom: 1.25em; }
+.prose ul, .prose ol { margin-top: 1.25em; margin-bottom: 1.25em; }
 </style>

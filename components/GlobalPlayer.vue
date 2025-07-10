@@ -1,6 +1,6 @@
 <template>
   <!-- 只有在有当前歌曲时才显示播放器 -->
-  <div v-if="playerStore.currentSong" class="bg-cyan-700/90 backdrop-blur-sm border-t border-gray-700 shadow-lg text-white">
+  <div v-if="playerStore.currentSong" class="relative bg-cyan-700/90 backdrop-blur-sm border-t border-gray-700 shadow-lg text-white">
     <!-- 播放进度条 -->
     <input
       type="range"
@@ -15,14 +15,12 @@
       <div class="h-20 flex items-center justify-between">
         <!-- 歌曲信息 -->
         <div class="flex items-center space-x-4 w-1/3 overflow-hidden">
-          <!-- 使用标准的 <img> 标签来显示外部链接的专辑封面 -->
           <img
             v-if="playerStore.currentSong.albumArt"
             :src="playerStore.currentSong.albumArt"
             class="h-12 w-12 rounded flex-shrink-0 object-cover"
             alt="专辑封面"
           />
-          <!-- 如果没有封面，则显示占位图 -->
           <img 
             v-else
             src="https://placehold.co/100x100/0891b2/ffffff?text=Art" 
@@ -52,7 +50,6 @@
         <!-- 音量和其他控制 -->
         <div class="flex items-center space-x-4 w-1/3 justify-end">
           <span class="text-xs">{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span>
-          <!-- 音量控制 -->
           <div class="flex items-center space-x-2">
             <button @click="toggleMute">
               <svg v-if="volume > 0" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
@@ -74,6 +71,11 @@
     </div>
     <!-- 隐藏的 Audio 元素 -->
     <audio ref="audioElement" @timeupdate="onTimeUpdate" @loadedmetadata="onLoadedMetadata" @ended="playerStore.playNext()"></audio>
+    
+    <!-- 新增：错误信息遮罩层 -->
+    <div v-if="playerStore.currentSongError" class="absolute inset-0 bg-black/70 flex items-center justify-center">
+      <p class="text-red-400 text-center px-4">{{ playerStore.currentSongError }}</p>
+    </div>
   </div>
 </template>
 
@@ -95,25 +97,25 @@ onMounted(() => {
   }
 })
 
-// 监听当前歌曲的变化，这是核心逻辑
 watch(() => playerStore.currentSong, (newSong) => {
   if (newSong && newSong.url && audioElement.value) {
     audioElement.value.src = newSong.url
-    audioElement.value.volume = volume.value // 确保新歌使用当前音量
-    // 只有在 isPlaying 为 true 时才尝试播放
+    audioElement.value.volume = volume.value
     if (playerStore.isPlaying) {
       audioElement.value.play().catch(e => console.error("播放失败:", e));
     }
   }
-}, { deep: true }) // 使用深度监听确保 url 变化时也能触发
+}, { deep: true })
 
-// 监听播放状态的变化
 watch(() => playerStore.isPlaying, (isPlaying) => {
   if (!audioElement.value) return
-  if (isPlaying) {
-    audioElement.value.play().catch(e => console.error("播放失败:", e));
-  } else {
-    audioElement.value.pause()
+  // 只有在没有错误时才响应播放/暂停
+  if (!playerStore.currentSongError) {
+    if (isPlaying) {
+      audioElement.value.play().catch(e => console.error("播放失败:", e));
+    } else {
+      audioElement.value.pause()
+    }
   }
 })
 

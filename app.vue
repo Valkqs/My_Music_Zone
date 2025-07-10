@@ -44,7 +44,7 @@
 
 <script setup>
 useHead({
-  title: 'My Music Zone - 首页',
+  title: 'Valk\'s Music Zone',
   meta: [
     { name: 'description', content: '欢迎来到我的个人音乐空间' }
   ],

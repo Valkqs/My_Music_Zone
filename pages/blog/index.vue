@@ -8,14 +8,14 @@
 
     <!-- 文章列表 -->
     <div v-else-if="articles && articles.length" class="space-y-12">
-      <div v-for="article in articles" :key="article._path">
-        <NuxtLink :to="article._path" class="block group">
+      <div v-for="article in articles" :key="article.slug">
+        <NuxtLink :to="`/blog/${article.slug}`" class="block group">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             <!-- 封面图 -->
             <div class="md:col-span-1 w-full aspect-video rounded-lg overflow-hidden">
               <CldImage
                 :src="article.cover || 'my-music-site/blog-placeholder'"
-                :alt="article.title"
+                alt="文章封面"
                 width="400"
                 height="225"
                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
@@ -43,15 +43,12 @@
 </template>
 
 <script setup>
-// 移除了 "import { queryContent } from '#content'"，让 Nuxt 自动导入
-
-// 获取所有 /blog 目录下的文章，并按日期倒序排列
-const { data: articles, pending, error } = await useAsyncData('all-articles', () => 
-  queryContent('/blog').sort({ date: -1 }).find()
-)
+// 从我们自己的新 API 获取数据
+const { data: articles, pending, error } = await useFetch('/api/articles');
 
 // 格式化日期的辅助函数
 const formatDate = (dateString) => {
+  if (!dateString) return '';
   const date = new Date(dateString)
   return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
 }
