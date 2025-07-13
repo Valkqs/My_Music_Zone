@@ -101,7 +101,7 @@
       <!-- Overlay Text -->
       <div class="relative z-20 text-center px-4">
         <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-white" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.6);">Welcome</h1>
-        <p class="mt-4 max-w-2xl mx-auto text-lg text-white" style="text-shadow: 1px 1px 4px rgba(0,0,0,0.6);">to Valk's music zone</p>
+        <p class="mt-4 max-w-2xl mx-auto text-lg text-white" style="text-shadow: 1px 1px 4px rgba(0,0,0,0.6);">to my music zone</p>
       </div>
     </section>
 
@@ -138,7 +138,7 @@
               这个网站是我与世界分享作品的角落。你可以在这里听到我最近在听的专辑，阅读专辑背后的故事，或者只是随意逛逛。希望音乐能为你带来片刻的宁静或一丝共鸣。
             </p>
             <p class="mt-4 text-lg leading-8 text-gray-300">
-              搜索请点击右上角音乐库。
+              搜索请点击右上角<NuxtLink to="/music" class="text-teal-400 font-semibold hover:underline">音乐库</NuxtLink>。看博客请点击右上角<NuxtLink to="/blog" class="text-teal-400 font-semibold hover:underline">博客</NuxtLink>。
             </p>
           </div>
         </div>

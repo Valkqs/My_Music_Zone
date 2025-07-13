@@ -32,7 +32,18 @@
           <!-- 如果是 HTML 块，用 v-html 渲染 -->
           <div v-if="block.type === 'html'" v-html="block.content"></div>
           <!-- 如果是播放器块，渲染 InlinePlayer 组件 -->
-          <InlinePlayer v-if="block.type === 'player'" :songmid="block.songmid" />
+          <InlinePlayer v-if="block.type === 'player'" :songmid="block.props.songmid" />
+          <!-- 新增：如果是图片块，渲染 CldImage 组件 -->
+          <CldImage
+            v-if="block.type === 'cld-image'"
+            :src="block.props.src"
+            :alt="block.props.alt || '博客中的图片'"
+            :width="block.props.width || 800"
+            :height="block.props.height || 600"
+            class="my-6 rounded-lg shadow-lg mx-auto"
+            format="auto"
+            quality="auto"
+          />
         </div>
       </div>
     </div>
